@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aiot-service
+  namespace: default
+  labels:
+    app: aiot-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aiot-service
+  template:
+    metadata:
+      labels:
+        app: aiot-service
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+      - name: telemetry-processor
+        image: yuvrajlagad/aiot-processor:v1.0
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aiot-service
+  namespace: default
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+  selector:
+    app: aiot-service
